@@ -1,4 +1,6 @@
-<x-layouts.admin>
+@extends('layouts.admin')
+
+@section('content')
     <x-page-header title="Categories" />
     <div class="container-fluid">
         <div class="row">
@@ -64,88 +66,86 @@
             </div>
         </div>
     </div>
+@endsection
+@push('scripts')
+    <script>
+        $(document).ready(function() {
 
-    @push('scripts')
-    
-        <script>
-            $(document).ready(function() {
+            var $modal = $('.modal');
+            var $form = $modal.find('form');
 
-                var $modal = $('.modal');
-                var $form  = $modal.find('form');
+            $('body').on('click', '.add-btn', function(e) {
+                $modal.find('.modal-title').text("@lang('Add Category')");
+                $form.attr('action', "{{ route('categories.store') }} ");
+                $form.trigger('reset');
+                $modal.modal('show');
+            });
 
-                $('body').on('click', '.add-btn', function(e) {
-                    $modal.find('.modal-title').text("@lang('Add Category')");
-                    $form.attr('action', "{{ route('categories.store') }} ");
-                    $form.trigger('reset');
-                    $modal.modal('show');
+            $('body').on('click', '.edit-btn', function(e) {
+                var category = $(this).data('category');
+                var action = "{{ route('categories.update', ':id') }}";
+
+                $form.find(`input[name=title]`).val(category.title);
+                $form.find(`textarea[name=description]`).val(category.description);
+
+                $modal.find('.modal-title').text("@lang('Edit Category')");
+                $form.attr('action', action.replace(':id', category.id));
+                $modal.modal('show');
+            });
+
+            $form.on('submit', function(e) {
+                e.preventDefault();
+                var data = new FormData(this);
+                var id = $('#categoryId').val();
+                var url = $(this).attr('action');
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    dataType: "json",
+                    success: function(response) {
+                        if (response.success) {
+                            getCategoryList();
+                            $modal.modal('hide');
+                        }
+                        alert(response.message);
+                    }
                 });
+            });
 
-                $('body').on('click', '.edit-btn', function(e) {
-                    var category = $(this).data('category');
-                    var action = "{{ route('categories.update', ':id') }}";
+            $('body').on('click', '.delete-btn', function() {
+                var id = $(this).data('id');
+                var action = "{{ route('categories.destroy', ':id') }}";
 
-                    $form.find(`input[name=title]`).val(category.title);
-                    $form.find(`textarea[name=description]`).val(category.description);
-
-                    $modal.find('.modal-title').text("@lang('Edit Category')");
-                    $form.attr('action', action.replace(':id', category.id));
-                    $modal.modal('show');
-                });
-
-                $form.on('submit', function(e) {
-                    e.preventDefault();
-                    var data = new FormData(this);
-                    var id = $('#categoryId').val();
-                    var url = $(this).attr('action');
+                if (confirm('Are you sure want to delete this category?')) {
                     $.ajax({
-                        type: 'POST',
-                        url: url,
-                        data: data,
-                        processData: false,
-                        contentType: false,
-                        dataType: "json",
+                        type: 'get',
+                        url: action.replace(":id", id),
                         success: function(response) {
                             if (response.success) {
                                 getCategoryList();
                                 $modal.modal('hide');
                             }
                             alert(response.message);
-                        }
-                    });
-                });
-
-                $('body').on('click','.delete-btn', function() {
-                    var id = $(this).data('id');
-                    var action = "{{ route('categories.destroy', ':id') }}";
-
-                    if (confirm('Are you sure want to delete this category?')) {
-                        $.ajax({
-                            type: 'get',
-                            url: action.replace(":id", id),
-                            success: function(response) {
-                                if (response.success) {
-                                    getCategoryList();
-                                    $modal.modal('hide');
-                                }
-                                alert(response.message);
-                            },
-                        })
-                    }
-                });
-
-                function getCategoryList() {
-                    $.ajax({
-                        type: 'get',
-                        url: "{{ route('categories.list') }}",
-                        success: function(response) {
-                            if (response.success) {
-                                $(".category-table-body").html(response.html);
-                            }
                         },
                     })
                 }
-                
             });
-        </script>
-    @endpush
-</x-layouts.admin>
+
+            function getCategoryList() {
+                $.ajax({
+                    type: 'get',
+                    url: "{{ route('categories.list') }}",
+                    success: function(response) {
+                        if (response.success) {
+                            $(".category-table-body").html(response.html);
+                        }
+                    },
+                })
+            }
+
+        });
+    </script>
+@endpush

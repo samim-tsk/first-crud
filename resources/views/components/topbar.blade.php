@@ -44,10 +44,8 @@
                         </a>
                     </form>
 
-                    <!-- Dropdown for filtered routes -->
                     <div id="routeDropdown" class="dropdown-menu"
                         style="display: none; position: absolute; width: 100%; max-height: 200px; overflow-y: auto;">
-                        <!-- Filtered route items will appear here -->
                     </div>
                 </li>
             </ul>

@@ -24,7 +24,7 @@ class AuthController extends Controller
             return redirect()->back()->withErrors('Invalid credentials');
         }
         
-        return redirect()->intended(route('dashborad'));
+        return redirect()->intended(route('dashboard'));
 
     }
 
